@@ -1,0 +1,18 @@
+# This project was generated using a Cookiecutter template:
+#       https://github.com/daotl/go-template
+
+cookiecutter_inputs:
+  project_name: "go-web-common"
+  go_module_path: "github.com/daotl/go-web-common"
+  license_owner: "DAOT Labs"
+  base_branch: "main"
+  contact_email: ""
+  project_description: "Common code for Go web projects"
+  github_specific_features: "y"
+  private_project: "n"
+  use_codecov: "y"
+  use_lefthook: "y"
+  use_precommit: "y"
+  go_version: "1.24"
+  go_toolchain_version: "1.24.5"
+  license: "MIT"

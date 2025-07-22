@@ -1,0 +1,26 @@
+{
+  "template": "github.com:daotl/go-template",
+  "commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "go-web-common",
+      "project_description": "Common code for Go web projects",
+      "go_module_path": "github.com/daotl/go-web-common",
+      "license_owner": "DAOT Labs",
+      "base_branch": "main",
+      "contact_email": "",
+      "github_specific_features": "y",
+      "private_project": "n",
+      "use_codecov": "y",
+      "use_lefthook": "y",
+      "use_precommit": "y",
+      "go_version": "1.24",
+      "go_toolchain_version": "1.24.5",
+      "license": "MIT",
+      "_template": "github.com:daotl/go-template",
+      "_commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090"
+    }
+  },
+  "directory": null
+}
