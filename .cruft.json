@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/daotl/go-template",
-  "commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090",
+  "commit": "a687fb577508a50900abf70c1ae509fff2a9ef6f",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -19,7 +19,7 @@
       "go_toolchain_version": "1.24.5",
       "license": "MIT",
       "_template": "https://github.com/daotl/go-template",
-      "_commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090"
+      "_commit": "a687fb577508a50900abf70c1ae509fff2a9ef6f"
     }
   },
   "directory": null
