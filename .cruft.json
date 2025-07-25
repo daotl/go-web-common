@@ -1,5 +1,5 @@
 {
-  "template": "github.com:daotl/go-template",
+  "template": "https://github.com/daotl/go-template",
   "commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090",
   "checkout": null,
   "context": {
@@ -18,7 +18,7 @@
       "go_version": "1.24",
       "go_toolchain_version": "1.24.5",
       "license": "MIT",
-      "_template": "github.com:daotl/go-template",
+      "_template": "https://github.com/daotl/go-template",
       "_commit": "dbb3dbd9a5c20c5e18fecd71de743de958ca5090"
     }
   },
