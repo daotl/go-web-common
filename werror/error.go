@@ -28,9 +28,9 @@ func ToError(x interface{}) error {
 type Err struct { //nolint:errname // lib
 	error
 
-	HttpStatus int
-	Code       string
-	Message    string
+	HttpStatus int    `json:"-"`
+	Code       string `json:"code"`
+	Message    string `json:"message"`
 }
 
 // NewBaseErr creates a new base Err.
