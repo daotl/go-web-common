@@ -33,6 +33,17 @@ type Err struct { //nolint:errname // lib
 	Message    string `json:"message"`
 }
 
+// ToErr converts any value to an *Err.
+// If x is not an *Err, the base will be ErrInternalError.
+func ToErr(x interface{}) *Err {
+	err := ToError(x)
+	werr := &Err{}
+	if errors.As(err, &werr) {
+		return werr
+	}
+	return NewErr(*ErrInternalError, err.Error(), "")
+}
+
 // NewBaseErr creates a new base Err.
 func NewBaseErr(httpStatus int, code, msg string) *Err {
 	return &Err{
