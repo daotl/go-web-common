@@ -1,5 +1,8 @@
 [tools]
-go = "1.24"
-golangci-lint = "latest"
 lefthook = "latest"
 pre-commit = "latest"
+go = "1.24"
+golangci-lint = "latest"
+
+[hooks]
+postinstall = "lefthook install"
