@@ -25,12 +25,20 @@ func ToError(x interface{}) error {
 }
 
 // Err is the base error type.
+// Reference: https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors
 type Err struct { //nolint:errname // lib
 	error
 
-	HttpStatus int    `json:"-"`
-	Code       string `json:"code"`
-	Message    string `json:"message"`
+	// HTTP status code
+	HttpStatus int `json:"-"`
+	// One of a server-defined set of error codes.
+	Code string `json:"code"`
+	// A human-readable representation of the error.
+	Message string `json:"message"`
+	// An array of details about specific errors that led to this reported error.
+	Details []*Err `json:"details"`
+	// Custom error data to return to the client.
+	Data any `json:"-"`
 }
 
 // ToErr converts any value to an *Err.
@@ -109,7 +117,6 @@ func IsErrOf(err error, code string) bool {
 }
 
 // References:
-// https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors
 // https://docs.microsoft.com/en-us/rest/api/storageservices/common-rest-api-error-codes
 // https://docs.azure.cn/en-us/cdn/cdn-api-get-endpoint
 
@@ -158,8 +165,9 @@ var (
 	ErrNotFound              = NewBaseErr(h.StatusNotFound, "NotFound", "Not found")
 	ErrEndpointNotFound      = NewBaseErr(h.StatusNotFound, "EndpointNotFound", "The requested endpoint does not exist")
 	ErrResourceNotFound      = NewBaseErr(h.StatusNotFound, "ResourceNotFound", "The specified resource does not exist")
-	ErrMethodNotSupported    = NewBaseErr(h.StatusMethodNotAllowed, "MethodNotAllowed", "Method not allowed")
-	ErrTimeout               = NewBaseErr(h.StatusRequestTimeout, "RequestTimeout", "Request timeout")
+	ErrMethodNotAllowed      = NewBaseErr(h.StatusMethodNotAllowed, "MethodNotAllowed", "Method not allowed")
+	ErrTimeout               = NewBaseErr(h.StatusRequestTimeout, "Timeout", "Timeout")
+	ErrRequestTimeout        = NewBaseErr(h.StatusRequestTimeout, "RequestTimeout", "Request timeout")
 	ErrConflict              = NewBaseErr(h.StatusConflict, "Conflict", "Conflict")
 	ErrResourceAlreadyExists = NewBaseErr(
 		h.StatusConflict,
@@ -174,12 +182,22 @@ var (
 	ErrPreconditionFailed = NewBaseErr(h.StatusPreconditionFailed, "PreconditionFailed", "Precondition failed")
 	ErrPayloadTooLarge    = NewBaseErr(
 		h.StatusRequestEntityTooLarge,
+		"PayloadTooLarge",
+		"Payload too large",
+	)
+	ErrRequestEntityTooLarge = NewBaseErr(
+		h.StatusRequestEntityTooLarge,
 		"RequestEntityTooLarge",
 		"Request entity too large",
 	)
 	ErrTooManyRequests     = NewBaseErr(h.StatusTooManyRequests, "TooManyRequests", "Too many requests")
 	ErrClientClosedRequest = NewBaseErr(StatusClientClosedRequest, "ClientClosedRequest", "Client closed request")
 	ErrInternalError       = NewBaseErr(
+		h.StatusInternalServerError,
+		"InternalError",
+		"The system encountered an internal error",
+	)
+	ErrInternalServerError = NewBaseErr(
 		h.StatusInternalServerError,
 		"InternalServerError",
 		"The server encountered an internal error, please retry the request",
@@ -191,3 +209,18 @@ var (
 		"The server is currently unable to receive requests. Please retry your request",
 	)
 )
+
+var HttpStatus2ErrMap = map[int]*Err{
+	h.StatusBadRequest:            ErrBadRequest,
+	h.StatusUnauthorized:          ErrUnauthorized,
+	h.StatusForbidden:             ErrForbidden,
+	h.StatusNotFound:              ErrNotFound,
+	h.StatusMethodNotAllowed:      ErrMethodNotAllowed,
+	h.StatusRequestTimeout:        ErrRequestTimeout,
+	h.StatusConflict:              ErrConflict,
+	h.StatusPreconditionFailed:    ErrPreconditionFailed,
+	h.StatusRequestEntityTooLarge: ErrRequestEntityTooLarge,
+	h.StatusTooManyRequests:       ErrTooManyRequests,
+	h.StatusInternalServerError:   ErrInternalServerError,
+	h.StatusServiceUnavailable:    ErrServiceUnavailable,
+}
