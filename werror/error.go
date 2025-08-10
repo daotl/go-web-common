@@ -49,7 +49,7 @@ func ToErr(x interface{}) *Err {
 	if errors.As(err, &werr) {
 		return werr
 	}
-	return NewErr(*ErrInternalError, err.Error(), "")
+	return NewErr(ErrInternalError, err.Error(), "")
 }
 
 // NewBaseErr creates a new base Err.
@@ -63,7 +63,7 @@ func NewBaseErr(httpStatus int, code, msg string) *Err {
 }
 
 // NewBaseErrFrom creates a new base Err from another base Err.
-func NewBaseErrFrom(base Err, code, msg string) *Err {
+func NewBaseErrFrom(base *Err, code, msg string) *Err {
 	if strings.TrimSpace(code) == "" {
 		code = base.Code
 	}
@@ -80,7 +80,7 @@ func NewBaseErrFrom(base Err, code, msg string) *Err {
 }
 
 // NewErr creates a new Err from a base Err.
-func NewErr(base Err, msg, msgDetail string) *Err {
+func NewErr(base *Err, msg, msgDetail string) *Err {
 	msg = strings.TrimSpace(msg)
 	if msg == "" {
 		msg = base.Message
