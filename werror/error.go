@@ -12,7 +12,7 @@ type Stringer interface {
 	String() string
 }
 
-// ToError converts any value to an error.
+// ToError converts any value to an error, default to ErrInternalServerError.
 func ToError(x interface{}) error {
 	switch v := x.(type) {
 	case error:
@@ -20,7 +20,7 @@ func ToError(x interface{}) error {
 	case Stringer:
 		return errors.New(v.String())
 	default:
-		return ErrInternalError
+		return ErrInternalServerError
 	}
 }
 
@@ -40,14 +40,14 @@ type Err struct { //nolint:errname // lib
 }
 
 // ToErr converts any value to an *Err.
-// If x is not an *Err, the base will be ErrInternalError.
+// If x is not an *Err, the base will be ErrInternalServerError.
 func ToErr(x interface{}) *Err {
 	err := ToError(x)
 	werr := &Err{}
 	if errors.As(err, &werr) {
 		return werr
 	}
-	return NewErr(ErrInternalError, err.Error(), "")
+	return NewErrFromError(ErrInternalServerError, err)
 }
 
 // NewBaseErr creates a new base Err.
@@ -92,6 +92,16 @@ func NewErr(base *Err, msg, msgDetail string) *Err {
 		HttpStatus: base.HttpStatus,
 		Code:       base.Code,
 		Message:    msg,
+	}
+}
+
+// NewErrFromError creates a new Err from an error.
+func NewErrFromError(base *Err, err error) *Err {
+	return &Err{
+		error:      err,
+		HttpStatus: base.HttpStatus,
+		Code:       base.Code,
+		Message:    base.Message + ": " + err.Error(),
 	}
 }
 
