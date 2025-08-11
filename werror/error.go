@@ -32,11 +32,11 @@ type Err struct { //nolint:errname // lib
 	// HTTP status code
 	HttpStatus int `json:"-"`
 	// One of a server-defined set of error codes.
-	Code string `json:"code"    dc:"Error code"`
+	Code string `json:"code"              v:"required" dc:"Error code"`
 	// A human-readable representation of the error.
-	Message string `json:"message" dc:"Error message"`
+	Message string `json:"message"           v:"required" dc:"Error message"`
 	// An array of details about specific errors that led to this reported error.
-	Details []*Err `json:"details" dc:"Error details"`
+	Details []*Err `json:"details,omitempty"              dc:"Error details"`
 }
 
 // ToErr converts any value to an *Err.
