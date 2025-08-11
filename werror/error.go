@@ -97,11 +97,19 @@ func NewErr(base *Err, msg, msgDetail string) *Err {
 
 // NewErrFromError creates a new Err from an error.
 func NewErrFromError(base *Err, err error) *Err {
+	msgDetail := err.Error()
+	werr := &Err{}
+	if errors.As(err, &werr) {
+		if werr.Code == base.Code && werr.Message == base.Message {
+			return werr
+		}
+		msgDetail = werr.Message
+	}
 	return &Err{
 		error:      err,
 		HttpStatus: base.HttpStatus,
 		Code:       base.Code,
-		Message:    base.Message + ": " + err.Error(),
+		Message:    base.Message + ": " + msgDetail,
 	}
 }
 
