@@ -14,6 +14,9 @@ type Stringer interface {
 
 // ToError converts any value to an error, default to ErrInternalServerError.
 func ToError(x interface{}) error {
+	if x == nil {
+		return nil
+	}
 	switch v := x.(type) {
 	case error:
 		return v
@@ -52,6 +55,9 @@ type Err struct { //nolint:errname // lib
 // ToErr converts any value to an *Err.
 // If x is not an *Err, the base will be ErrInternalServerError.
 func ToErr(x interface{}) WError {
+	if x == nil {
+		return nil
+	}
 	err := ToError(x)
 	werr := &Err{}
 	if errors.As(err, &werr) {
@@ -128,6 +134,9 @@ func (e *Err) Error() string {
 }
 
 func (e *Err) Is(target error) bool {
+	if t, ok := target.(*Err); ok {
+		return t.Code == e.Code
+	}
 	return errors.Is(e.error, target)
 }
 
