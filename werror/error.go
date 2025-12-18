@@ -24,6 +24,16 @@ func ToError(x interface{}) error {
 	}
 }
 
+type WError interface {
+	error
+	Is(error) bool
+	As(any) bool
+	GetHttpStatus() int
+	GetCode() string
+	GetMessage() string
+	GetDetails() []WError
+}
+
 // Err is the base error type.
 // Reference: https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors
 type Err struct { //nolint:errname // lib
@@ -36,12 +46,12 @@ type Err struct { //nolint:errname // lib
 	// A human-readable representation of the error.
 	Message string `json:"message"           v:"required" dc:"Error message"`
 	// An array of details about specific errors that led to this reported error.
-	Details []*Err `json:"details,omitempty"              dc:"Error details"`
+	Details []WError `json:"details,omitempty"              dc:"Error details"`
 }
 
 // ToErr converts any value to an *Err.
 // If x is not an *Err, the base will be ErrInternalServerError.
-func ToErr(x interface{}) *Err {
+func ToErr(x interface{}) WError {
 	err := ToError(x)
 	werr := &Err{}
 	if errors.As(err, &werr) {
@@ -61,16 +71,16 @@ func NewBaseErr(httpStatus int, code, msg string) *Err {
 }
 
 // NewBaseErrFrom creates a new base Err from another base Err.
-func NewBaseErrFrom(base *Err, code, msg string) *Err {
+func NewBaseErrFrom(base WError, code, msg string) WError {
 	if strings.TrimSpace(code) == "" {
-		code = base.Code
+		code = base.GetCode()
 	}
 	if strings.TrimSpace(msg) == "" {
-		msg = base.Message
+		msg = base.GetMessage()
 	}
 	err := &Err{
-		error:      fmt.Errorf("%w: %s %s", base.error, code, msg),
-		HttpStatus: base.HttpStatus,
+		error:      fmt.Errorf("%w: %s %s", base, code, msg),
+		HttpStatus: base.GetHttpStatus(),
 		Code:       code,
 		Message:    msg,
 	}
@@ -78,38 +88,38 @@ func NewBaseErrFrom(base *Err, code, msg string) *Err {
 }
 
 // NewErr creates a new Err from a base Err.
-func NewErr(base *Err, msg, msgDetail string) *Err {
+func NewErr(base WError, msg, msgDetail string) *Err {
 	msg = strings.TrimSpace(msg)
 	if msg == "" {
-		msg = base.Message
+		msg = base.GetMessage()
 	}
 	msgDetail = strings.TrimSpace(msgDetail)
 	if msgDetail != "" {
 		msg = msg + ": " + msgDetail
 	}
 	return &Err{
-		error:      fmt.Errorf("%w: %s", base.error, msg),
-		HttpStatus: base.HttpStatus,
-		Code:       base.Code,
+		error:      fmt.Errorf("%w: %s", base, msg),
+		HttpStatus: base.GetHttpStatus(),
+		Code:       base.GetCode(),
 		Message:    msg,
 	}
 }
 
 // NewErrFromError creates a new Err from an error.
-func NewErrFromError(base *Err, err error) *Err {
+func NewErrFromError(base WError, err error) *Err {
 	msgDetail := err.Error()
 	werr := &Err{}
 	if errors.As(err, &werr) {
-		if werr.Code == base.Code && werr.Message == base.Message {
+		if werr.Code == base.GetCode() && werr.Message == base.GetMessage() {
 			return werr
 		}
 		msgDetail = werr.Message
 	}
 	return &Err{
 		error:      err,
-		HttpStatus: base.HttpStatus,
-		Code:       base.Code,
-		Message:    base.Message + ": " + msgDetail,
+		HttpStatus: base.GetHttpStatus(),
+		Code:       base.GetCode(),
+		Message:    base.GetMessage() + ": " + msgDetail,
 	}
 }
 
@@ -125,11 +135,27 @@ func (e *Err) As(target any) bool {
 	return errors.As(e.error, target)
 }
 
+func (e *Err) GetHttpStatus() int {
+	return e.HttpStatus
+}
+
+func (e *Err) GetCode() string {
+	return e.Code
+}
+
+func (e *Err) GetMessage() string {
+	return e.Message
+}
+
+func (e *Err) GetDetails() []WError {
+	return e.Details
+}
+
 // IsErrOf checks if err wraps *Err and has the given code.
 func IsErrOf(err error, code string) bool {
 	var e *Err
 	ok := errors.As(err, &e)
-	return ok && e.Code == code
+	return ok && e.GetCode() == code
 }
 
 // References:
