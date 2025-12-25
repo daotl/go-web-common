@@ -44,10 +44,8 @@ type Err interface {
 	SetSubErrors(errs []Err)
 	// AddSubErrors will append errs to the current sub-errors slice
 	AddSubErrors(errs ...Err)
-	GetMetadata() map[string]any
-	SetMetadata(meta map[string]any)
-	// AddMetadata will merge meta map to the current metadata map
-	AddMetadata(meta map[string]any)
+	GetMetadata() any
+	SetMetadata(meta any)
 }
 
 // Serr is the base error struct type.
@@ -64,7 +62,7 @@ type Serr struct { //nolint:errname // lib
 	// An array of specific errors that led to this error.
 	SubErrors []Err `json:"subErrors,omitempty"              dc:"Sub-errors that led to this error"`
 	// Error metadata, useful for debugging, logging, generating i18n error messages etc.
-	Metadata map[string]any `json:"metadata,omitempty"               dc:"Error metadata"`
+	Metadata any `json:"metadata,omitempty"               dc:"Error metadata"`
 }
 
 // ToErr converts any value to an *Err.
@@ -198,23 +196,12 @@ func (e *Serr) AddSubErrors(errs ...Err) {
 	e.SubErrors = append(e.SubErrors, errs...)
 }
 
-func (e *Serr) GetMetadata() map[string]any {
+func (e *Serr) GetMetadata() any {
 	return e.Metadata
 }
 
-func (e *Serr) SetMetadata(meta map[string]any) {
+func (e *Serr) SetMetadata(meta any) {
 	e.Metadata = meta
-}
-
-// AddMetadata will merge meta map to the current metadata map.
-func (e *Serr) AddMetadata(meta map[string]any) {
-	if e.Metadata == nil {
-		e.Metadata = meta
-	} else {
-		for k, v := range meta {
-			e.Metadata[k] = v
-		}
-	}
 }
 
 // IsErrOf checks if err wraps *Err and has the given code.
