@@ -28,7 +28,7 @@ func ToError(x any) error {
 }
 
 // Err is the standard error interface.
-// Code using this package should return Err interface in function signatures
+// Code using this package should return Err/I18nErr interfaces in function signatures
 // instead of the Serr struct type.
 // Err.SetXxx methods return the Err itself.
 type Err interface {

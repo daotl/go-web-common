@@ -23,10 +23,37 @@ Common code for Go web projects
 Example:
 ```go
 import "github.com/daotl/go-web-common/werror"
+import "github.com/nicksnyder/go-i18n/v2/i18n"
 
-err := werror.NewErr(werror.ErrNotFound, "User not found", "")
-err.AddSubErrors(error{err1})
-err.SetMetadata(map[string]interface{}{"userID": 123})
+// Simple error without i18n
+func SimpleError() werror.Err {
+    // Create and customize errors
+    err := werror.NewErr(werror.ErrNotFound, "User not found", "")
+    err.AddSubErrors(err1)
+    err.SetMetadata(map[string]interface{}{"userID": 123})
+    return err
+}
+
+// Define i18n error template (can be reused)
+var ErrTmplUserNotFound = werror.MustNewI18nErrTmpl(werror.ErrNotFound, &i18n.Message{
+    ID:    "UserNotFound",
+    Other: "User {{.Name}} not found",
+})
+
+func GetUser(name string) Err {
+    // Render error with data
+    err, _ := ErrTmplUserNotFound.Render(map[string]string{"Name": name})
+    return err
+}
+
+// Or use NewI18nErr for one-time errors
+func SimpleI18nError() I18nErr {
+    err, _ := werror.NewI18nErr(werror.ErrBadRequest, &i18n.Message{
+        ID:    "InvalidInput",
+        Other: "Invalid input provided",
+    }, nil)
+    return err
+}
 ```
 
 ## Development
