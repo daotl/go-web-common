@@ -24,9 +24,9 @@ Example:
 ```go
 import "github.com/daotl/go-web-common/werror"
 
-err := werror.NewErr(werror.ErrNotFound, "User not found", "").
-    SetSubErrors([]error{err1}).
-    SetMetadata(map[string]interface{}{"userID": 123})
+err := werror.NewErr(werror.ErrNotFound, "User not found", "")
+err.AddSubErrors(error{err1})
+err.SetMetadata(map[string]interface{}{"userID": 123})
 ```
 
 ## Development

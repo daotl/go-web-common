@@ -37,17 +37,17 @@ type Err interface {
 	As(any) bool
 	GetHttpStatus() int
 	GetCode() string
-	SetCode(code string) Err
+	SetCode(code string)
 	GetMessage() string
-	SetMessage(msg string) Err
+	SetMessage(msg string)
 	GetSubErrors() []Err
-	SetSubErrors(errs []Err) Err
+	SetSubErrors(errs []Err)
 	// AddSubErrors will append errs to the current sub-errors slice
-	AddSubErrors(errs ...Err) Err
+	AddSubErrors(errs ...Err)
 	GetMetadata() map[string]any
-	SetMetadata(meta map[string]any) Err
+	SetMetadata(meta map[string]any)
 	// AddMetadata will merge meta map to the current metadata map
-	AddMetadata(meta map[string]any) Err
+	AddMetadata(meta map[string]any)
 }
 
 // Serr is the base error struct type.
@@ -173,46 +173,41 @@ func (e *Serr) GetCode() string {
 	return e.Code
 }
 
-func (e *Serr) SetCode(code string) Err {
+func (e *Serr) SetCode(code string) {
 	e.Code = code
-	return e
 }
 
 func (e *Serr) GetMessage() string {
 	return e.Message
 }
 
-func (e *Serr) SetMessage(msg string) Err {
+func (e *Serr) SetMessage(msg string) {
 	e.Message = msg
-	return e
 }
 
 func (e *Serr) GetSubErrors() []Err {
 	return e.SubErrors
 }
 
-func (e *Serr) SetSubErrors(errs []Err) Err {
+func (e *Serr) SetSubErrors(errs []Err) {
 	e.SubErrors = errs
-	return e
 }
 
 // AddSubErrors will append errs to the current sub-errors slice.
-func (e *Serr) AddSubErrors(errs ...Err) Err {
+func (e *Serr) AddSubErrors(errs ...Err) {
 	e.SubErrors = append(e.SubErrors, errs...)
-	return e
 }
 
 func (e *Serr) GetMetadata() map[string]any {
 	return e.Metadata
 }
 
-func (e *Serr) SetMetadata(meta map[string]any) Err {
+func (e *Serr) SetMetadata(meta map[string]any) {
 	e.Metadata = meta
-	return e
 }
 
 // AddMetadata will merge meta map to the current metadata map.
-func (e *Serr) AddMetadata(meta map[string]any) Err {
+func (e *Serr) AddMetadata(meta map[string]any) {
 	if e.Metadata == nil {
 		e.Metadata = meta
 	} else {
@@ -220,7 +215,6 @@ func (e *Serr) AddMetadata(meta map[string]any) Err {
 			e.Metadata[k] = v
 		}
 	}
-	return e
 }
 
 // IsErrOf checks if err wraps *Err and has the given code.
