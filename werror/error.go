@@ -26,6 +26,36 @@ func ToError(x interface{}) error {
 		return ErrInternalServerError
 	}
 }
+func ConvertToWError(x interface{}) *Err {
+	if x == nil {
+		return nil
+	}
+
+	if werr, ok := x.(*Err); ok {
+		return werr
+	}
+
+	var rawErr error
+	switch v := x.(type) {
+	case error:
+		rawErr = v
+	default:
+		rawErr = fmt.Errorf("%v", x)
+	}
+
+	detailErr := &Err{
+		Message: rawErr.Error(),
+	}
+
+	return &Err{
+		error:      rawErr,
+		HttpStatus: ErrInternalServerError.HttpStatus,
+		Code:       ErrInternalServerError.Code,
+		Message:    ErrInternalServerError.Message,
+		Details:    []WError{detailErr}, // 有技术详情，非nil
+		params:     nil,
+	}
+}
 
 type WError interface {
 	error
@@ -35,13 +65,16 @@ type WError interface {
 	GetCode() string
 	GetMessage() string
 	GetDetails() []WError
+	SetDetails(details []WError)
+	GetParams() map[string]any
+	SetParams(params map[string]any)
+	SetMessage(msg string)
 }
 
 // Err is the base error type.
 // Reference: https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors
 type Err struct { //nolint:errname // lib
 	error
-
 	// HTTP status code
 	HttpStatus int `json:"-"`
 	// One of a server-defined set of error codes.
@@ -50,6 +83,7 @@ type Err struct { //nolint:errname // lib
 	Message string `json:"message"           v:"required" dc:"Error message"`
 	// An array of details about specific errors that led to this reported error.
 	Details []WError `json:"details,omitempty"              dc:"Error details"`
+	params  map[string]any
 }
 
 // ToErr converts any value to an *Err.
@@ -73,6 +107,8 @@ func NewBaseErr(httpStatus int, code, msg string) *Err {
 		HttpStatus: httpStatus,
 		Code:       code,
 		Message:    msg,
+		Details:    nil,
+		params:     nil,
 	}
 }
 
@@ -129,6 +165,24 @@ func NewErrFromError(base WError, err error) *Err {
 	}
 }
 
+func NewErrWithParams(base *Err, code string, params map[string]any, msgDetail string) *Err {
+	if strings.TrimSpace(code) == "" {
+		code = base.Code
+	}
+	msg := base.Message
+
+	detailErr := &Err{
+		Message: base.Message + msgDetail,
+	}
+	return &Err{
+		error:      fmt.Errorf("%w: %s", base.error, msg),
+		HttpStatus: base.HttpStatus,
+		Code:       code,
+		Message:    msg,
+		Details:    []WError{detailErr},
+		params:     params,
+	}
+}
 func (e *Err) Error() string {
 	return fmt.Sprintf("%v: %s", e.HttpStatus, e.error.Error())
 }
@@ -155,9 +209,36 @@ func (e *Err) GetCode() string {
 func (e *Err) GetMessage() string {
 	return e.Message
 }
-
+func (e *Err) SetMessage(msg string) {
+	e.Message = msg
+}
 func (e *Err) GetDetails() []WError {
 	return e.Details
+}
+func (e *Err) SetDetails(details []WError) {
+	e.Details = details
+}
+
+func (e *Err) GetParams() map[string]any {
+	if e.params == nil {
+		return nil
+	}
+	paramsCopy := make(map[string]any, len(e.params))
+	for k, v := range e.params {
+		paramsCopy[k] = v
+	}
+	return paramsCopy
+}
+
+func (e *Err) SetParams(params map[string]any) {
+	if params == nil {
+		e.params = make(map[string]any)
+		return
+	}
+	e.params = make(map[string]any, len(params))
+	for k, v := range params {
+		e.params[k] = v
+	}
 }
 
 // IsErrOf checks if err wraps *Err and has the given code.
