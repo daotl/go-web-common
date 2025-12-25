@@ -147,12 +147,12 @@ func TestErr_Is(t *testing.T) {
 
 func TestErr_As(t *testing.T) {
 	base := ErrBadRequest
-	var target *Err
+	var target *Serr
 
 	if !errors.As(base, &target) {
 		t.Error("errors.As(base, &target) failed")
-	} else if target.Code != base.Code {
-		t.Errorf("As() target code = %v, want %v", target.Code, base.Code)
+	} else if target.Code != base.GetCode() {
+		t.Errorf("As() target code = %v, want %v", target.Code, base.GetCode())
 	}
 }
 
@@ -173,8 +173,8 @@ func TestNewErrFromError_Message(t *testing.T) {
 
 	t.Logf("Generated Message: %s", err.GetMessage())
 
-	if err.GetCode() != base.Code {
-		t.Errorf("Code mismatch: got %v, want %v", err.GetCode(), base.Code)
+	if err.GetCode() != base.GetCode() {
+		t.Errorf("Code mismatch: got %v, want %v", err.GetCode(), base.GetCode())
 	}
 
 	// Check Details/Unwrap
