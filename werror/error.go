@@ -30,6 +30,7 @@ func ToError(x any) error {
 // Err is the standard error interface.
 // Code using this package should return Err interface in function signatures
 // instead of the Serr struct type.
+// Err.SetXxx methods return the Err itself.
 type Err interface {
 	error
 	Is(error) bool
@@ -41,6 +42,8 @@ type Err interface {
 	SetMessage(msg string) Err
 	GetSubErrors() []Err
 	SetSubErrors(errs []Err) Err
+	// AddSubErrors will append errs to the current sub-errors slice
+	AddSubErrors(errs ...Err) Err
 	GetMetadata() map[string]any
 	SetMetadata(meta map[string]any) Err
 	// AddMetadata will merge meta map to the current metadata map
@@ -193,6 +196,12 @@ func (e *Serr) SetSubErrors(errs []Err) Err {
 	return e
 }
 
+// AddSubErrors will append errs to the current sub-errors slice.
+func (e *Serr) AddSubErrors(errs ...Err) Err {
+	e.SubErrors = append(e.SubErrors, errs...)
+	return e
+}
+
 func (e *Serr) GetMetadata() map[string]any {
 	return e.Metadata
 }
@@ -202,6 +211,7 @@ func (e *Serr) SetMetadata(meta map[string]any) Err {
 	return e
 }
 
+// AddMetadata will merge meta map to the current metadata map.
 func (e *Serr) AddMetadata(meta map[string]any) Err {
 	if e.Metadata == nil {
 		e.Metadata = meta
